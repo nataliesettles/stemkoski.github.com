@@ -154,7 +154,7 @@ function init()
 
 
 	// Particle Example 2
-	var particleTexture = THREE.ImageUtils.loadTexture( 'images/hatch1.png' );
+	var texture = THREE.ImageUtils.loadTexture( 'images/hatch1.png' );
 
 	particleGroup = new THREE.Object3D();
 	particleAttributes = { startSize: [], startPosition: [], randomness: [] };
@@ -162,11 +162,14 @@ function init()
 	var totalParticles = 500;
 	
 	for( var i = 0; i < totalParticles; i++ ) {
-	    var spriteMaterial = new THREE.SpriteMaterial( { map: particleTexture, useScreenCoordinates: false, color: 0xffffff } );
+	    var material = new THREE.MeshBasicMaterial( { map: texture, useScreenCoordinates: false, transparent: true, opacity: 0.33, color: 0xffffff } );
 		
-		var sprite = new THREE.Sprite( spriteMaterial );
-		sprite.scale.set( 32, 32, 1.0 ); // imageWidth, imageHeight
-		sprite.transparent = true;
+        var geometry = new THREE.PlaneGeometry( 1, 1 );
+
+		var particle = new THREE.Mesh( geometry, material )
+		particle.scale.set( 32, 32, 1.0 ); // imageWidth, imageHeight
+		
+		var radiusRange = 100;
 
 		// Math.random offers a number between 0 (inclusive) and 1 (exclusive), so deleting 0.5 centers a 1-sized area on 0
 		var xScalingFactor = 4;
@@ -177,38 +180,38 @@ function init()
 		// var zCoord = 0;
 
 		// Rounded Ends box:
-		// var xCoord = Math.random() * xScalingFactor;
-		// var yCoord;
-		// var zCoord = 0;
-		// if  (xCoord >= xScalingFactor - (yScalingFactor/2)) {
-		// 	var radiusSquare = (yScalingFactor/2) * (yScalingFactor/2);
-		// 	var rightBisector = (yScalingFactor/2) - (xScalingFactor - xCoord);
-		// 	var rightBisectorSquare = rightBisector * rightBisector;
-		// 	var chord = 2 * (Math.sqrt(radiusSquare - rightBisectorSquare));
-		// 	yCoord = (Math.random() * chord) - (chord/2);
+		var xCoord = Math.random() * xScalingFactor;
+		var yCoord;
+		var zCoord = 0;
+		if  (xCoord >= xScalingFactor - (yScalingFactor/2)) {
+			var radiusSquare = (yScalingFactor/2) * (yScalingFactor/2);
+			var rightBisector = (yScalingFactor/2) - (xScalingFactor - xCoord);
+			var rightBisectorSquare = rightBisector * rightBisector;
+			var chord = 2 * (Math.sqrt(radiusSquare - rightBisectorSquare));
+			yCoord = (Math.random() * chord) - (chord/2);
 
-		// } else if (xCoord <= (yScalingFactor/2)) {
-		// 	var radiusSquare = (yScalingFactor/2) * (yScalingFactor/2);
-		// 	var rightBisector = (yScalingFactor/2) - xCoord;
-		// 	var rightBisectorSquare = rightBisector * rightBisector;
-		// 	var chord = 2 * (Math.sqrt(radiusSquare - rightBisectorSquare));
-		// 	yCoord = (Math.random() * chord) - (chord/2);
+		} else if (xCoord <= (yScalingFactor/2)) {
+			var radiusSquare = (yScalingFactor/2) * (yScalingFactor/2);
+			var rightBisector = (yScalingFactor/2) - xCoord;
+			var rightBisectorSquare = rightBisector * rightBisector;
+			var chord = 2 * (Math.sqrt(radiusSquare - rightBisectorSquare));
+			yCoord = (Math.random() * chord) - (chord/2);
 
-		// } else {
-		// 	yCoord = (Math.random() * yScalingFactor) - (yScalingFactor/2)
-		// };
-		// xCoord -= xScalingFactor/2; // center the cloud horizontally
-		// yCoord -= yScalingFactor/2; // center the cloud vertically
-		// sprite.position.set( xCoord, yCoord, zCoord );
+		} else {
+			yCoord = (Math.random() * yScalingFactor) - (yScalingFactor/2)
+		};
+		xCoord -= xScalingFactor/2; // center the cloud horizontally
+		yCoord -= yScalingFactor/2; // center the cloud vertically
+		particle.position.set( xCoord, yCoord, zCoord );
 
 
 		// A Circle:
-		var radiusRange = 50;
-		var thickness = 1;
-		var other = 1;
-		sprite.position.set( Math.random() - 0.5, Math.random() - 0.5, 0);
-		// sprite.position.setLength( radiusRange * (Math.random() * thickness + other) );
-		sprite.position.setLength( radiusRange * (Math.random() * thickness + other) );
+		// var radiusRange = 50;
+		// var thickness = 1;
+		// var other = 1;
+		// particle.position.set( Math.random() - 0.5, Math.random() - 0.5, 0);
+		// // sprite.position.setLength( radiusRange * (Math.random() * thickness + other) );
+		// particle.position.setLength( radiusRange * (Math.random() * thickness + other) );
 
 
 		
@@ -223,22 +226,21 @@ function init()
 
 
 		// for a cube:
-		// sprite.position.multiplyScalar( radiusRange + noise );
+		particle.position.multiplyScalar( radiusRange + noise );
 		// for a solid sphere:
 		// sprite.position.setLength( radiusRange * Math.random() );
 		// for a spherical shell:
 		
 		
 		// sprite.color.setRGB( Math.random(),  Math.random(),  Math.random() ); 
-		// sprite.material.color.setHSL( Math.random(), 0.9, 0.7 ); 
+		// particle.material.color.setHSL( Math.random(), 0.9, 0.7 ); 
 		
-		sprite.opacity = 0.3; // translucent particles
-		sprite.alpha
-		// sprite.material.blending = THREE.AdditiveBlending; // "glowing" particles
+		// particle.opacity = 0.3; // translucent particles
+		// particle.material.blending = THREE.AdditiveBlending; // "glowing" particles
 		
-		particleGroup.add( sprite );
+		particleGroup.add( particle );
 		// add variable qualities to arrays, if they need to be accessed later
-		particleAttributes.startPosition.push( sprite.position.clone() );
+		particleAttributes.startPosition.push( particle.position.clone() );
 		particleAttributes.randomness.push( Math.random() );
 	}
 	particleGroup.position.y = 50;
