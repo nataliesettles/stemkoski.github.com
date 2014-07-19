@@ -60,7 +60,7 @@ function init()
 	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 	scene.add(camera);
-	camera.position.set(0,100,400);
+	camera.position.set(0,100,1500);
 	camera.lookAt(scene.position);
 
 	// RENDERER
@@ -88,7 +88,7 @@ function init()
 
 	// LIGHT
 	var light = new THREE.PointLight(0xffffff);
-	light.position.set(0,250,0);
+	light.position.set(0,250,100);
 	scene.add(light);
 
 	// FLOOR
@@ -114,78 +114,39 @@ function init()
 	////////////
 	
 
-	// create the particle variables
-
-	// Particle Example 1
-	// var particleCount = 4000,
-	//     particles = new THREE.Geometry(),
-	//     pMaterial = new THREE.ParticleBasicMaterial({
-	//       color: 0xFFFFFF,
- //  		  size: 20,
- //    	  map: THREE.ImageUtils.loadTexture( "images/spark.png" ),
- //    	  blending: THREE.AdditiveBlending,
- //  		  transparent: true
-	//     });
-
-	// // now create the individual particles
-	// for (var p = 0; p < particleCount; p++) {
-
-	//   // create a particle with random
-	//   // position values, -250 -> 250
-	//   var pX = Math.random() * 500 - 250,
-	//       pY = Math.random() * 500 - 250,
-	//       pZ = Math.random() * 500 - 250,
-	//       particle = new THREE.Vertex(
-	//         new THREE.Vector3(pX, pY, pZ)
-	//       );
-
-	//   // add it to the geometry
-	//   particles.vertices.push(particle);
-	// }
-
-	// // create the particle system
-	// var particleSystem = new THREE.ParticleSystem(
-	//     particles,
-	//     pMaterial);
-
-	// // add it to the scene
-	// scene.add(particleSystem);
-
 	// DEBUG ATTEMPT:
-	var texture = THREE.ImageUtils.loadTexture( 'images/hatch1.png' );
-	particleGroup = new THREE.Object3D();
-	var totalParticles = 500;
-
-	var zCoord = 0;
-	for( var i = 0; i < totalParticles; i++ ) {
-		// the particles:
-		var material = new THREE.MeshBasicMaterial( { map: texture, transparent: true, opacity: 0.20 } );
-        var geometry = new THREE.PlaneGeometry( 1, 1 );
-		var particle = new THREE.Mesh( geometry, material )
-		particle.scale.set( 32, 32, 0 ); // imageWidth, imageHeight
-		// the donut-cloud shape:
-		var radiusRange = 50;
-		var thickness = 1;
-		var centerSpace = 1;
-		var xCoord = Math.random() - 0.5;
-		var yCoord = Math.random() - 0.5;
-		particle.position.set( xCoord, yCoord, zCoord );
-		// zCoord -= 1;
-		particle.position.setLength( radiusRange * (Math.random() * thickness + centerSpace) );
-		// particle.material.blending = THREE.AdditiveBlending; // "glowing" particles
-		
-		particleGroup.add( particle );
-	}
-	particleGroup.position.y = 100;
-	scene.add( particleGroup );
-
-
-
-	// Particle Example 2
 	// var texture = THREE.ImageUtils.loadTexture( 'images/hatch1.png' );
-	// var texture = THREE.ImageUtils.loadTexture( 'images/spark.png' );
-	// TODO: make a pool of hatch particles to draw from randomly
+	// particleGroup = new THREE.Object3D();
+	// var totalParticles = 500;
 
+	// var zCoord = 0;
+	// for( var i = 0; i < totalParticles; i++ ) {
+	// 	// the particles:
+	// 	var material = new THREE.MeshBasicMaterial( { map: texture, transparent: true, opacity: 0.20 } );
+ //        var geometry = new THREE.PlaneGeometry( 1, 1 );
+	// 	var particle = new THREE.Mesh( geometry, material )
+	// 	particle.scale.set( 32, 32, 0 ); // imageWidth, imageHeight
+	// 	// the donut-cloud shape:
+	// 	var radiusRange = 50;
+	// 	var thickness = 1;
+	// 	var centerSpace = 1;
+	// 	var xCoord = Math.random() - 0.5;
+	// 	var yCoord = Math.random() - 0.5;
+	// 	particle.position.set( xCoord, yCoord, zCoord );
+	// 	// zCoord -= 1;
+	// 	particle.position.setLength( radiusRange * (Math.random() * thickness + centerSpace) );
+	// 	// particle.material.blending = THREE.AdditiveBlending; // "glowing" particles
+		
+	// 	particleGroup.add( particle );
+	// }
+	// particleGroup.position.y = 100;
+	// scene.add( particleGroup );
+
+
+
+	// DONUT-SHAPED CLOUD
+	// var texture = THREE.ImageUtils.loadTexture( 'images/hatch1.png' );
+	// // TODO: make a pool of hatch particles to draw from randomly
 	// particleGroup = new THREE.Object3D();
 	// particleAttributes = { startSize: [], startPosition: [], randomness: [] };
 	
@@ -194,78 +155,83 @@ function init()
 	// var zCoord = 0;
 	// for( var i = 0; i < totalParticles; i++ ) {
 	//     // var material = new THREE.MeshBasicMaterial( { map: texture, useScreenCoordinates: false, transparent: true, opacity: 0.20, color: 0xffffff } );
-	//     var material = new THREE.MeshBasicMaterial( { map: texture, transparent: true, opacity: 0.20, color: 0xffffff } );
+	//     var spriteMaterial = new THREE.SpriteMaterial( { map: texture, useScreenCoordinates: false, alphaTest: 0.5, transparent: true, opacity: 0.2, color: 0xffffff, blending: THREE.AdditiveBlending } );
 		
- //        var geometry = new THREE.PlaneGeometry( 1, 1 );
+	// 	var particle = new THREE.Sprite( spriteMaterial );
 
-	// 	var particle = new THREE.Mesh( geometry, material )
+	//  //    var material = new THREE.MeshLambertMaterial( { map: texture, transparent: true, color: 0xffffff, blending: THREE.AdditiveBlending } );
+		
+ //  //       var geometry = new THREE.PlaneGeometry( 1, 1 );
+
+	// 	// var particle = new THREE.Mesh( geometry, material )
 	// 	particle.scale.set( 32, 32, 0 ); // imageWidth, imageHeight
 		
+		
+		// Plain Jane box:
 		// var radiusRange = 100;
-
-		// Math.random offers a number between 0 (inclusive) and 1 (exclusive), so deleting 0.5 centers a 1-sized area on 0
 		// var xScalingFactor = 4;
 		// var yScalingFactor = 1;
-		// Plain Jane box:
 		// var xCoord = (Math.random() * xScalingFactor) - (xScalingFactor/2);
 		// var yCoord = (Math.random() * yScalingFactor) - (yScalingFactor/2);
-		// var zCoord = 0;
+		// particle.position.set( xCoord, yCoord, zCoord );
+		// particle.position.multiplyScalar( radiusRange );
+		// // zCoord -= 0.0001;
 
 		// Rounded Ends box:
+		// var radiusRange = 100;
+		// var xScalingFactor = 2;
+		// var yScalingFactor = 1;
 		// var xCoord = Math.random() * xScalingFactor;
 		// var yCoord;
-		// var zCoord = 0;
+		// var zCoord = 10;
 		// if  (xCoord >= xScalingFactor - (yScalingFactor/2)) {
 		// 	var radiusSquare = (yScalingFactor/2) * (yScalingFactor/2);
 		// 	var rightBisector = (yScalingFactor/2) - (xScalingFactor - xCoord);
 		// 	var rightBisectorSquare = rightBisector * rightBisector;
 		// 	var chord = 2 * (Math.sqrt(radiusSquare - rightBisectorSquare));
 		// 	yCoord = (Math.random() * chord) - (chord/2);
-
 		// } else if (xCoord <= (yScalingFactor/2)) {
 		// 	var radiusSquare = (yScalingFactor/2) * (yScalingFactor/2);
 		// 	var rightBisector = (yScalingFactor/2) - xCoord;
 		// 	var rightBisectorSquare = rightBisector * rightBisector;
 		// 	var chord = 2 * (Math.sqrt(radiusSquare - rightBisectorSquare));
 		// 	yCoord = (Math.random() * chord) - (chord/2);
-
 		// } else {
 		// 	yCoord = (Math.random() * yScalingFactor) - (yScalingFactor/2)
 		// };
 		// xCoord -= xScalingFactor/2; // center the cloud horizontally
 		// yCoord -= yScalingFactor/2; // center the cloud vertically
 		// particle.position.set( xCoord, yCoord, zCoord );
+		// particle.position.multiplyScalar( radiusRange );
+		// zCoord -= 0.05
 
 
-		// A Circle:
+		// A Donut:
 		// var radiusRange = 50;
 		// var thickness = 1;
 		// var centerSpace = 1;
 		// var xCoord = Math.random() - 0.5;
 		// var yCoord = Math.random() - 0.5;
 		// particle.position.set( xCoord, yCoord, zCoord );
-		// zCoord -= 1;
-		// particle.position.setLength( radiusRange * (Math.random() * thickness + other) );
+		// // zCoord -= 0.1;
 		// particle.position.setLength( radiusRange * (Math.random() * thickness + centerSpace) );
+		// // particle.position.multiplyScalar( radiusRange );
 
 
-		
-		
-
-		// adds a little noise outside the form:
+		// Adds a little noise outside the form:
 		// var bool = Math.floor((Math.random() * 10) + 1);
 		// var noise = 0
 		// if(bool <= 2) {
 		// 	noise = (Math.random() * (radiusRange * 0.1))
 		// }
 
-
 		// for a cube:
-		// particle.position.multiplyScalar( radiusRange + noise );
+		// var radiusRange = 100;
+		// particle.position.multiplyScalar( radiusRange );
+
 		// for a solid sphere:
+		// var radiusRange = 100;
 		// sprite.position.setLength( radiusRange * Math.random() );
-		// for a spherical shell:
-		
 		
 		// sprite.color.setRGB( Math.random(),  Math.random(),  Math.random() ); 
 		// particle.material.color.setHSL( Math.random(), 0.9, 0.7 ); 
@@ -274,7 +240,7 @@ function init()
 		// particle.material.blending = THREE.AdditiveBlending; // "glowing" particles
 		
 		// particleGroup.add( particle );
-		// add variable qualities to arrays, if they need to be accessed later
+		// // add variable qualities to arrays, if they need to be accessed later
 		// particleAttributes.startPosition.push( particle.position.clone() );
 		// particleAttributes.randomness.push( Math.random() );
 	// }
@@ -282,8 +248,8 @@ function init()
 
 	// TODO: find a way to make multiple particleGroups
 
-	// particleGroup.position.y = 100;
-	// scene.add( particleGroup );
+	particleGroup.position.y = 100;
+	scene.add( particleGroup );
 }
 
 // Ex 1
@@ -303,11 +269,11 @@ function animate()
 
 function update()
 {	
-	// var time = 4 * clock.getElapsedTime();
+	var time = 4 * clock.getElapsedTime();
 	
-	// for ( var c = 0; c < particleGroup.children.length; c ++ ) 
-	// {
-	// 	var sprite = particleGroup.children[ c ];
+	for ( var c = 0; c < particleGroup.children.length; c ++ ) 
+	{
+		var sprite = particleGroup.children[ c ];
 
 	// 	// particle wiggle
 		// var wiggleScale = 2;
@@ -317,12 +283,12 @@ function update()
 		
 		// pulse away/towards center
 		// individual rates of movement
-		// var a = particleAttributes.randomness[c] + 1;
-		// var pulseFactor = Math.sin(a * time) * 0.005 + 0.9;
-		// sprite.position.x = particleAttributes.startPosition[c].x * pulseFactor;
-		// sprite.position.y = particleAttributes.startPosition[c].y * pulseFactor;
+		var a = particleAttributes.randomness[c] + 1;
+		var pulseFactor = Math.sin(a * time) * 0.005 + 0.9;
+		sprite.position.x = particleAttributes.startPosition[c].x * pulseFactor;
+		sprite.position.y = particleAttributes.startPosition[c].y * pulseFactor;
 		// sprite.position.z = particleAttributes.startPosition[c].z * pulseFactor;	
-	// }
+	}
 
 	// rotate the entire group
 	// particleGroup.rotation.x = time * 0.5;
