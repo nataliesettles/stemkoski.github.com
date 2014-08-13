@@ -177,7 +177,18 @@ function update()
 
 	    // get the particle
 	    var particle = particles.vertices[pCount];
-	    console.log(particle);
+	    // console.log(particle);
+
+	    // pulse away/towards center
+		// individual rates of movement
+		var a = particleAttributes.randomness[pCount] + 1;
+		var pulseFactor = Math.sin(a * time) * 0.005 + 0.9;
+		particle.x = particleAttributes.startPosition[pCount].x * pulseFactor;
+		particle.y = particleAttributes.startPosition[pCount].y * pulseFactor;
+		// particle.position.z = particleAttributes.startPosition[pCount].z * pulseFactor;	
+	}
+
+	particleSystem.geometry.__dirtyVertices = true;
 
 	    // check if we need to reset
 	    // if (particle.position.y < -200) {
@@ -199,16 +210,7 @@ function update()
 		// sprite.position.y += wiggleScale * (Math.random() - 0.5);
 		// sprite.position.z += wiggleScale * (Math.random() - 0.5);
 		
-		// pulse away/towards center
-		// individual rates of movement
-		var a = particleAttributes.randomness[pCount] + 1;
-		var pulseFactor = Math.sin(a * time) * 0.005 + 0.9;
-		particle.x = particleAttributes.startPosition[pCount].x * pulseFactor;
-		particle.y = particleAttributes.startPosition[pCount].y * pulseFactor;
-		// particle.position.z = particleAttributes.startPosition[pCount].z * pulseFactor;	
-	}
-
-	particleSystem.geometry.__dirtyVertices = true;
+		
 
 	// rotate the entire group
 	// particleGroup.rotation.x = time * 0.5;

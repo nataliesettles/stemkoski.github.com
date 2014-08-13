@@ -136,7 +136,7 @@ function init()
 		particle.position.set( xCoord, yCoord, zCoord );
 		zCoord += 0.001;
 		particle.position.setLength( (Math.random() * thickness + centerSpace) );
-		particle.position.multiplyScalar( radiusRange );
+		// particle.position.multiplyScalar( radiusRange );
 		// particle.material.blending = THREE.AdditiveBlending; // "glowing" particles
 		
 		particleGroup.add( particle );
