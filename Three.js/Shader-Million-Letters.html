@@ -9,10 +9,10 @@
 <body>
 
 <script src="js/Three.js"></script>
+<script src="js/DAT.GUI.min.js"></script>
 <script src="js/Detector.js"></script>
 <script src="js/Stats.js"></script>
 <script src="js/OrbitControls.js"></script>
-<script src="js/DAT.GUI.min.js"></script>
 <script src="js/THREEx.KeyboardState.js"></script>
 <script src="js/THREEx.FullScreen.js"></script>
 <script src="js/THREEx.WindowResize.js"></script>
@@ -149,7 +149,9 @@ var clock = new THREE.Clock();
 // custom global variables
 //var cube;
 var uniforms;
-var top1, gui, control;
+var top1, books;
+var gui, control;
+var letterCountElement;
 
 init();
 animate();
@@ -178,7 +180,7 @@ function init()
 	THREEx.WindowResize(renderer, camera);
 	THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 	// CONTROLS
-	controls = new THREE.OrbitControls( camera, renderer.domElement );
+	// controls = new THREE.OrbitControls( camera, renderer.domElement );
 	// STATS
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
@@ -233,13 +235,17 @@ function init()
         var cy = Math.floor(code / lettersPerSide);
         var v,t;
         geo.vertices.push(
+        	// face
             new THREE.Vector3( j*1.1+0.05, ln*1.1+0.05, 0 ),
             new THREE.Vector3( j*1.1+1.05, ln*1.1+0.05, 0 ),
             new THREE.Vector3( j*1.1+1.05, ln*1.1+1.05, 0 ),
-            new THREE.Vector3( j*1.1+0.05, ln*1.1+1.05, 0 )
+            // face2
+            new THREE.Vector3( j*1.1+0.05, ln*1.1+1.05, 0 ),
+            new THREE.Vector3( j*1.1+1.05, ln*1.1+1.05, 0 ),
+            new THREE.Vector3( j*1.1+1.05, ln*1.1+0.05, 0 )
     );
-    var face = new THREE.Face3(i*4+0, i*4+1, i*4+2);
-    var face2 = new THREE.Face3(i*4+3, i*4+2, i*4+1);
+    var face = new THREE.Face3(i*6+0, i*6+1, i*6+2);
+    var face2 = new THREE.Face3(i*6+3, i*6+2, i*6+1);
     geo.faces.push(face, face2);
     var ox=cx/lettersPerSide, oy=cy/lettersPerSide, off=1/lettersPerSide;
     var sz = lettersPerSide*fontSize;
@@ -284,7 +290,7 @@ function init()
   });
   shaderMaterial.depthTest = false;
 
-  var books = [];
+  books = [];
   var w = 80 * 1.1;
   var n = 8;
   var r = w * 1/2 * 1/Math.PI * n;
@@ -305,6 +311,58 @@ function init()
   
   top1.position.set(0,0,0);
   scene.add(top1);
+
+  camera.position.y = 40;
+  camera.lookAt(scene.position);
+
+  var down = false;
+  var sx = 0, sy = 0;
+  window.onmousedown = function (ev){
+    if (ev.target == renderer.domElement) {
+      down = true;
+      sx = ev.clientX;
+      sy = ev.clientY;
+    }
+  };
+  var wheelHandler = function(ev) {
+    var ds = (ev.detail < 0 || ev.wheelDelta > 0) ? (1/1.25) : 1.25;
+    var fov = camera.fov * ds;
+    fov = Math.min(120, Math.max(1, fov));
+    camera.fov = fov;
+    camera.updateProjectionMatrix();
+    ev.preventDefault();
+  };
+  window.addEventListener('DOMMouseScroll', wheelHandler, false);
+  window.addEventListener('mousewheel', wheelHandler, false);
+  window.onmouseup = function(){ down = false; };
+  window.onmousemove = function(ev) {
+    if (down) {
+      var dx = ev.clientX - sx;
+      var dy = ev.clientY - sy;
+      camera.rotation.y += dx/500 * (camera.fov/45);;
+      camera.rotation.x += dy/500 * (camera.fov/45);
+      sx += dx;
+      sy += dy;
+    }
+  };
+
+  gui = new dat.GUI();
+  control = {
+    'Animation': 5,
+    'Books': 1
+  };
+  gui.add(control, 'Animation', 0, 100).step(1);
+  gui.add(control, 'Books', 1, books.length).step(1);
+
+  var letterCountTitle = document.createElement('p');
+  letterCountTitle.innerHTML = 'Look around by dragging, zoom with the mouse wheel<br><br>Letter count: ';
+  var s = letterCountTitle.style;
+  s.position = 'fixed';
+  s.left = s.top = '10px';
+  document.body.appendChild(letterCountTitle);
+
+  letterCountElement = document.createElement('span');
+  letterCountTitle.appendChild(letterCountElement);
 
 
 	// //THE ORIGINAL STEMKOSKI EXAMPLE FOR REF
@@ -346,29 +404,29 @@ function update(t)
 {
 
 	uniforms.time.value += 0.05;
-    // uniforms.effectAmount.value = control.Animation/100;
-    // var i;
-    // var letterCount = control.Books * BOOK.length;
-    // letterCountElement.textContent = letterCount;
-    // for (i=1; i<control.Books; i++) {
-    //   books[i].visible = true;
-    // }
-    // for (i=control.Books; i<books.length; i++) {
-    //   books[i].visible = false;
-    // }
+    uniforms.effectAmount.value = control.Animation/100;
+    var i;
+    var letterCount = control.Books * BOOK.length;
+    letterCountElement.textContent = letterCount;
+    for (i=1; i<control.Books; i++) {
+      books[i].visible = true;
+    }
+    for (i=control.Books; i<books.length; i++) {
+      books[i].visible = false;
+    }
     top1.position.y += 0.03;
     // renderer.render(scene, camera);
     // requestAnimationFrame(animate, renderer.domElement);
 
-	if ( keyboard.pressed("z") ) 
-	{ 
-		// do something
-	}
+	// if ( keyboard.pressed("z") ) 
+	// { 
+	// 	// do something
+	// }
 
 	var t = clock.getElapsedTime();
 	// customUniforms.mixAmount.value = 0.5 * (1.0 + Math.sin(t));
 	
-	controls.update();
+	// controls.update();
 	stats.update();
 }
 
