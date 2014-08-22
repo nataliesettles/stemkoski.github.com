@@ -18,10 +18,12 @@
 
 <!-- Custom shaders for particle effects -->
 <script type="x-shader/x-vertex" id="vertexshader">
-attribute sampler2D texture;
 varying vec3 vColor;
+attribute float a_my_bool;
+varying float v_my_bool;
 void main() 
 {
+	v_my_bool = a_my_bool;
 	vColor = vec3(1.0, 1.0, 1.0); // set RGB color associated to vertex; use later in fragment shader.
 	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 
@@ -34,14 +36,25 @@ void main()
 </script>
 
 <script type="x-shader/x-fragment" id="fragmentshader">
-// uniform sampler2D texture;
+uniform sampler2D texture1;
+uniform sampler2D texture2;
 varying vec3 vColor; // colors associated to vertices; assigned by vertex shader
+varying float v_my_bool;
 void main() 
 {
 	// calculates a color for the particle
 	gl_FragColor = vec4( vColor, 1.0 );
 	// sets a white particle texture to desired color
-	gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+	if (my_bool > 0.5) {
+        // my_bool is true
+        gl_FragColor = gl_FragColor * texture2D( texture1, gl_PointCoord );
+        bool = 0.0;
+    } else {
+        // my_bool is false
+        gl_FragColor = gl_FragColor * texture2D( texture2, gl_PointCoord );
+        bool = 1.0;
+    }
+	//gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
 }
 </script>
 <!-- end of custom shaders -->
@@ -136,25 +149,28 @@ function init()
 	var discTexture = THREE.ImageUtils.loadTexture( 'images/disc.png' );
 	var hatchTexture = THREE.ImageUtils.loadTexture( 'images/hatch1.png' );
 
-	var texture = function() {
-		var isTrue = Math.random() >= 0.5;
+    var texture = function() {
+        var isTrue = Math.random() >= 0.5;
         console.log("Bool says: " + randomNumber);
         if (isTrue) {
-        	return discTexture;
+            return discTexture;
         } else {
-        	return hatchTexture;
+            return hatchTexture;
         }
 	}
 	
 	// values that are constant for all particles during a draw call
+
 	var customUniforms = 
 	{
-		
+		texture1 : { type: "t", value: discTexture },
+		texture2 : { type: "t", value: hatchTexture },
+		textureArray : { }   
 	};
 
 	var customAttributes = {
 
-		texture:   { type: "t", value: texture },
+		a_my_bool : { type: , value: 0 };
 	};
 
 	var shaderMaterial = new THREE.ShaderMaterial( 
