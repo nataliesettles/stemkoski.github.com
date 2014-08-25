@@ -38,19 +38,20 @@ void main()
 <!-- fragment shader a.k.a. pixel shader -->
 <script id="fragmentShader" type="x-shader/x-vertex"> 
 
-uniform sampler2D texture[2];
-uniform int cloudPoints[6]; // indexes of which image to use for which vertex
+uniform sampler2D uTextureArray[ 2 ];
+//uniform int cloudPoints[6]; // indexes of which image to use for which vertex
 varying vec3 vColor; // colors associated to vertices; assigned by vertex shader
+//attribute int thisPoint;
+//if (thisPoint == null) thisPoint = 0; // initiate for loop
+//if (thisPoint == 6) thisPoint = 0; // reset when end reached
 
 void main() 
 {
 	// calculates a color for the particle
 	gl_FragColor = vec4( vColor, 1.0 );
 	// sets a white particle texture to desired color
-	for ( int i = 0; i < cloudPoints.length(); i++ ) { 
-	    int textureIndex = cloudPoints[i];
-        gl_FragColor = gl_FragColor * texture2D( texture[ 0 ], gl_PointCoord );
-    }
+    gl_FragColor = gl_FragColor * texture2D( uTextureArray[ 0 ], gl_PointCoord );
+
 }
 
 </script>
@@ -100,7 +101,7 @@ function init()
 	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 	scene.add(camera);
-	camera.position.set(0,100,400);
+	camera.position.set(0,150,400);
 	camera.lookAt(scene.position);	
 	// RENDERER
 	if ( Detector.webgl )
@@ -126,17 +127,17 @@ function init()
 	light.position.set(0,250,0);
 	scene.add(light);
 	// FLOOR
-	var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
-	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-	floorTexture.repeat.set( 10, 10 );
-	var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
-	var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
-	var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-	floor.position.y = -0.5;
-	floor.rotation.x = Math.PI / 2;
-	scene.add(floor);
-	// SKYBOX/FOG
-	scene.fog = new THREE.FogExp2( 0x9999ff, 0.00025 );
+	// var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
+	// floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+	// floorTexture.repeat.set( 10, 10 );
+	// var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+	// var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
+	// var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+	// floor.position.y = -0.5;
+	// floor.rotation.x = Math.PI / 2;
+	// scene.add(floor);
+	// // SKYBOX/FOG
+	// scene.fog = new THREE.FogExp2( 0x9999ff, 0.00025 );
 	
 	////////////
 	// CUSTOM //
@@ -157,15 +158,15 @@ function init()
 	var discTexture = THREE.ImageUtils.loadTexture( 'images/disc.png' );
 	var hatchTexture = THREE.ImageUtils.loadTexture( 'images/hatch1.png' );
 
-	console.log(discTexture);
+	// console.log(discTexture);
 	
 	//var ballTexture = new THREE.ImageUtils.loadTexture('images/uvgrid01.jpg');
 	
 	// use "this." to create global object
 	this.customUniforms = 
 	{
-		texture: { type: "tv", value: [ discTexture, hatchTexture ] },
-		cloudPoints: { type: "iv1", value: [] }
+		uTextureArray: { type: "tv", value: [ discTexture, hatchTexture ] },
+		// cloudPoints: { type: "iv1", value: [] }
 		// mixAmount: 	 { type: "f", value: 0.0 }
 	};
 	
@@ -183,17 +184,17 @@ function init()
 	// }
 
     // var pointImageIndexes = customUniforms.cloudPoints.value;
-    var numTextures = customUniforms.texture.value.length;
-    for ( var i = 0; i < geometry.vertices.length; i++ ) {
-    	var textureIndex = Math.floor( Math.random() * numTextures );
-    	// console.log( "Random index is " + textureIndex );
-    	customUniforms.cloudPoints.value.push( textureIndex );
-    }
+    // var numTextures = customUniforms.texture.value.length;
+    // for ( var i = 0; i < geometry.vertices.length; i++ ) {
+    // 	var textureIndex = Math.floor( Math.random() * numTextures );
+    // 	// console.log( "Random index is " + textureIndex );
+    // 	customUniforms.cloudPoints.value.push( textureIndex );
+    // }
 
-    console.log( "The textures are " + customUniforms.texture.value );
-    console.log( "The texture[0] is " + customUniforms.texture.value[0] );
-    console.log( "The texture[1] is " + customUniforms.texture.value[1] );
-    console.log( "The cloud points are " + customUniforms.cloudPoints.value );
+    // console.log( "The textures are " + customUniforms.texture.value );
+    // console.log( "The texture[0] is " + customUniforms.texture.value[0] );
+    // console.log( "The texture[1] is " + customUniforms.texture.value[1] );
+    // console.log( "The cloud points are " + customUniforms.cloudPoints.value );
 
 	// create custom material from the shader code above
 	//   that is within specially labeled script tags
@@ -202,11 +203,14 @@ function init()
 	    uniforms: customUniforms,
 		//attributes: customAttributes,
 		vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
-		fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+		fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+		transparent: true, alphaTest: 0.5,  // if having transparency issues, try including: alphaTest: 0.5, 
+		blending: THREE.AdditiveBlending // depthTest: false,
+		// I guess you don't need to do a depth test if you are alpha blending?
 	}   );
 	
     var cloud = new THREE.Object3D( geometry, customMaterial );
-    cloud.position.set( 0,65,0 );
+    cloud.position.set( 0,50,0 );
     scene.add( cloud );
 
 
