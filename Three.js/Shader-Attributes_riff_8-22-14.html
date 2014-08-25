@@ -49,7 +49,7 @@ void main()
 	// sets a white particle texture to desired color
 	for ( int i = 0; i < cloudPoints.length(); i++ ) { 
 	    int textureIndex = cloudPoints[i];
-        gl_FragColor = gl_FragColor * texture2D( texture[ textureIndex ], gl_PointCoord );
+        gl_FragColor = gl_FragColor * texture2D( texture[ 0 ], gl_PointCoord );
     }
 }
 
@@ -156,6 +156,8 @@ function init()
 
 	var discTexture = THREE.ImageUtils.loadTexture( 'images/disc.png' );
 	var hatchTexture = THREE.ImageUtils.loadTexture( 'images/hatch1.png' );
+
+	console.log(discTexture);
 	
 	//var ballTexture = new THREE.ImageUtils.loadTexture('images/uvgrid01.jpg');
 	
@@ -180,15 +182,19 @@ function init()
 	// 	values[i] = new THREE.Vector3( vec.x, 0, vec.z );
 	// }
 
-    var pointImageIndexes = customUniforms.cloudPoints.value;
+    // var pointImageIndexes = customUniforms.cloudPoints.value;
     var numTextures = customUniforms.texture.value.length;
     for ( var i = 0; i < geometry.vertices.length; i++ ) {
     	var textureIndex = Math.floor( Math.random() * numTextures );
-    	console.log( "Random index is " + textureIndex );
+    	// console.log( "Random index is " + textureIndex );
     	customUniforms.cloudPoints.value.push( textureIndex );
     }
 
-	
+    console.log( "The textures are " + customUniforms.texture.value );
+    console.log( "The texture[0] is " + customUniforms.texture.value[0] );
+    console.log( "The texture[1] is " + customUniforms.texture.value[1] );
+    console.log( "The cloud points are " + customUniforms.cloudPoints.value );
+
 	// create custom material from the shader code above
 	//   that is within specially labeled script tags
 	var customMaterial = new THREE.ShaderMaterial( 
