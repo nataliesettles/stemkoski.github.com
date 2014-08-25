@@ -18,28 +18,41 @@
 
 <!-- ---------------- Custom Shader Code ------------------------ -->
 <script id="vertexShader" type="x-shader/x-vertex">
-uniform float mixAmount;
-attribute vec3 endPosition;
 
-varying vec2 vUv;
+varying vec3 vColor;
 
 void main() 
-{ 
-    vUv = uv;
-    vec3 newPosition = mix( position, endPosition, mixAmount );
-	gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
+{
+	vColor = vec3(1.0, 0.0, 0.0); // set RGB color associated to vertex; use later in fragment shader.
+	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+	// option (1): draw particles at constant size on screen
+	// gl_PointSize = size;
+    // option (2): scale particles as objects in 3D space
+	gl_PointSize = 03.0 * ( 300.0 / length( mvPosition.xyz ) );
+	gl_Position = projectionMatrix * mvPosition;
 }
+
 </script>
 
 <!-- fragment shader a.k.a. pixel shader -->
 <script id="fragmentShader" type="x-shader/x-vertex"> 
-uniform sampler2D baseTexture;
-varying vec2 vUv;
+
+uniform sampler2D texture[2];
+uniform int cloudPoints[6]; // indexes of which image to use for which vertex
+varying vec3 vColor; // colors associated to vertices; assigned by vertex shader
 
 void main() 
 {
-    gl_FragColor = texture2D( baseTexture, vUv );
-}  
+	// calculates a color for the particle
+	gl_FragColor = vec4( vColor, 1.0 );
+	// sets a white particle texture to desired color
+	for ( int i = 0; i < cloudPoints.length(); i++ ) { 
+	    int textureIndex = cloudPoints[i];
+        gl_FragColor = gl_FragColor * texture2D( texture[ textureIndex ], gl_PointCoord );
+    }
+}
+
 </script>
 <!-- ----------------------------------------------------------- -->
 
@@ -129,43 +142,71 @@ function init()
 	// CUSTOM //
 	////////////
 	
-	var ballGeometry = new THREE.SphereGeometry( 60, 32, 16 );
+	// var ballGeometry = new THREE.SphereGeometry( 60, 32, 16 );
+
+	var geometry = new THREE.Geometry();
+	geometry.vertices.push(
+	    new THREE.Vector3( -10,  10, 0 ),
+	    new THREE.Vector3( -10, -10, 0 ),
+	    new THREE.Vector3(  10, -10, 0 ),
+	    new THREE.Vector3( -20,  10, 0 ),
+	    new THREE.Vector3( -20, -20, 0 ),
+	    new THREE.Vector3(  10, -20, 0 )
+    );
+
+	var discTexture = THREE.ImageUtils.loadTexture( 'images/disc.png' );
+	var hatchTexture = THREE.ImageUtils.loadTexture( 'images/hatch1.png' );
 	
-	var ballTexture = new THREE.ImageUtils.loadTexture('images/uvgrid01.jpg');
+	//var ballTexture = new THREE.ImageUtils.loadTexture('images/uvgrid01.jpg');
 	
 	// use "this." to create global object
 	this.customUniforms = 
 	{
-		baseTexture: { type: "t", value: ballTexture },
-		mixAmount: 	 { type: "f", value: 0.0 }
+		texture: { type: "tv", value: [ discTexture, hatchTexture ] },
+		cloudPoints: { type: "iv1", value: [] }
+		// mixAmount: 	 { type: "f", value: 0.0 }
 	};
 	
-	this.customAttributes = 
-	{
-		endPosition: { type: "v3", value: [] }
-	};
+	// this.customAttributes = 
+	// {
+	// 	// endPosition: { type: "v3", value: [] }
+	// };
 	
 	// set values of attributes
-	var values = customAttributes.endPosition.value;
-	for ( var i = 0; i < ballGeometry.vertices.length; i++ ) 
-	{
-		var vec = ballGeometry.vertices[i];
-		values[i] = new THREE.Vector3( vec.x, 0, vec.z );
-	}
+	// var values = customAttributes.endPosition.value;
+	// for ( var i = 0; i < ballGeometry.vertices.length; i++ ) 
+	// {
+	// 	var vec = ballGeometry.vertices[i];
+	// 	values[i] = new THREE.Vector3( vec.x, 0, vec.z );
+	// }
+
+    var pointImageIndexes = customUniforms.cloudPoints.value;
+    var numTextures = customUniforms.texture.value.length;
+    for ( var i = 0; i < geometry.vertices.length; i++ ) {
+    	var textureIndex = Math.floor( Math.random() * numTextures );
+    	console.log( "Random index is " + textureIndex );
+    	customUniforms.cloudPoints.value.push( textureIndex );
+    }
+
 	
 	// create custom material from the shader code above
 	//   that is within specially labeled script tags
 	var customMaterial = new THREE.ShaderMaterial( 
 	{
 	    uniforms: customUniforms,
-		attributes: customAttributes,
+		//attributes: customAttributes,
 		vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
 		fragmentShader: document.getElementById( 'fragmentShader' ).textContent
 	}   );
 	
-	var ball = new THREE.Mesh( ballGeometry, customMaterial );
-	ball.position.set(0, 65, 0);
-	scene.add( ball );
+    var cloud = new THREE.Object3D( geometry, customMaterial );
+    cloud.position.set( 0,65,0 );
+    scene.add( cloud );
+
+
+	// var ball = new THREE.Mesh( ballGeometry, customMaterial );
+	// ball.position.set(0, 65, 0);
+	// scene.add( ball );
 }
 
 function animate() 
@@ -183,7 +224,7 @@ function update()
 	}
 	
 	var t = clock.getElapsedTime();
-	customUniforms.mixAmount.value = 0.5 * (1.0 + Math.sin(t));
+	//customUniforms.mixAmount.value = 0.5 * (1.0 + Math.sin(t));
 	
 	controls.update();
 	stats.update();
