@@ -18,9 +18,12 @@
 
 <!-- Custom shaders for particle effects -->
 <script type="x-shader/x-vertex" id="vertexshader">
+// attribute int aTextureIndex;
+varying int textureIndex;
 varying vec3 vColor;
 void main() 
 {
+	textureIndex = aTextureIndex;
 	vColor = vec3(1.0, 1.0, 1.0); // set RGB color associated to vertex; use later in fragment shader.
 	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 
@@ -34,13 +37,14 @@ void main()
 
 <script type="x-shader/x-fragment" id="fragmentshader">
 uniform sampler2D uTextureArray[ 2 ];
+varying int textureIndex;
 varying vec3 vColor; // colors associated to vertices; assigned by vertex shader
 void main() 
 {
 	// calculates a color for the particle
 	gl_FragColor = vec4( vColor, 1.0 );
 	// sets a white particle texture to desired color
-	gl_FragColor = gl_FragColor * texture2D( uTextureArray[ 0 ], gl_PointCoord );
+	gl_FragColor = gl_FragColor * texture2D( uTextureArray[ textureIndex ], gl_PointCoord );
 }
 </script>
 <!-- end of custom shaders -->
@@ -129,11 +133,16 @@ function init()
 	geometry.vertices.push(
 	    new THREE.Vector3( -10,  10, 0 ),
 	    new THREE.Vector3( -10, -10, 0 ),
-	    new THREE.Vector3(  10, -10, 0 )
+	    new THREE.Vector3(  10, -10, 0 ),
+	    new THREE.Vector3( -20,  10, 0 ),
+	    new THREE.Vector3( -20, -20, 0 ),
+	    new THREE.Vector3(  10, -20, 0 )
     );
 	// var cubeGeometry = new THREE.CubeGeometry( 50, 50, 50, 20, 20, 20 );
 	var discTexture = THREE.ImageUtils.loadTexture( 'images/disc.png' );
 	var hatchTexture = THREE.ImageUtils.loadTexture( 'images/hatch1.png' );
+
+	var textures = [ discTexture, hatchTexture ];
 
  //    var texture = function() {
  //        var isTrue = Math.random() >= 0.5;
@@ -147,22 +156,33 @@ function init()
 	
 	// values that are constant for all particles during a draw call
 
-	var customUniforms = 
-	{
-		uTextureArray : { type: "tv", value: [ discTexture, hatchTexture ] }
-		// texture1 : { type: "t", value: discTexture },
-		// texture2 : { type: "t", value: hatchTexture },
-		// textureArray : { type: }   
+	// var customUniforms = 
+	// {
+	// 	uTextureArray : { type: "tv", value: [ discTexture, hatchTexture ] }
+	// 	// texture1 : { type: "t", value: discTexture },
+	// 	// texture2 : { type: "t", value: hatchTexture },
+	// 	// textureArray : { type: }   
+	// };
+
+	var customAttributes = {
+        
+        aTextureArray : { type: "tv", value: [ discTexture, hatchTexture ] }
+        // aTextureIndex : { type: "iv1", value: [] }
+
 	};
 
-	// var customAttributes = {
-
-	// };
+	var numTextures = customUniforms.uTextureArray.value.length;
+    for ( var i = 0; i < geometry.vertices.length; i++ ) {
+    	var textureIndex = Math.floor( Math.random() * numTextures );
+    	// console.log( "Random index is " + textureIndex );
+    	// customAttributes.aTextureIndex.value.push( textures[ textureIndex ] );
+    	customAttributes.aTextureArray.value.push( textures[ textureIndex ] );
+    }
 
 	var shaderMaterial = new THREE.ShaderMaterial( 
 	{
-		uniforms: 		customUniforms,
-		// attributes:     customAttributes,
+		// uniforms: 		customUniforms,
+		attributes:     customAttributes,
 		vertexShader:   document.getElementById( 'vertexshader' ).textContent,
 		fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
 		transparent: true, alphaTest: 0.5,  // if having transparency issues, try including: alphaTest: 0.5, 
