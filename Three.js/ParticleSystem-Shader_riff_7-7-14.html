@@ -19,7 +19,8 @@
 <!-- Custom shaders for particle effects -->
 <script type="x-shader/x-vertex" id="vertexshader">
 // attribute int aTextureIndex;
-varying int textureIndex;
+attribute float aTextureIndex;
+varying float textureIndex;
 varying vec3 vColor;
 void main() 
 {
@@ -37,14 +38,29 @@ void main()
 
 <script type="x-shader/x-fragment" id="fragmentshader">
 uniform sampler2D uTextureArray[ 2 ];
-varying int textureIndex;
+varying float textureIndex;
 varying vec3 vColor; // colors associated to vertices; assigned by vertex shader
+
+vec4 getSampleFromArray(sampler2D textures[2], int ndx, vec2 uv) {
+    vec4 color;
+    if ( ndx == 0 ) {
+      color = texture2D( textures[ 0 ], uv );
+    } else /* if ( ndx == 1 ) */ {
+      color = texture2D( textures[ 1 ], uv );
+    // } else if ( ndx == 2 ) {
+    //   color = texture2D(u_textures[2], uv );
+    // } else /* if ( ndx == 3 ) */ {
+    //   color = texture2D( u_textures[3], uv );
+    }
+    return color;
+}
+
 void main() 
 {
 	// calculates a color for the particle
 	gl_FragColor = vec4( vColor, 1.0 );
 	// sets a white particle texture to desired color
-	gl_FragColor = gl_FragColor * texture2D( uTextureArray[ textureIndex ], gl_PointCoord );
+	gl_FragColor = gl_FragColor * getSampleFromArray( uTextureArray, int( textureIndex ), gl_PointCoord );
 }
 </script>
 <!-- end of custom shaders -->
@@ -156,32 +172,33 @@ function init()
 	
 	// values that are constant for all particles during a draw call
 
-	// var customUniforms = 
-	// {
-	// 	uTextureArray : { type: "tv", value: [ discTexture, hatchTexture ] }
-	// 	// texture1 : { type: "t", value: discTexture },
-	// 	// texture2 : { type: "t", value: hatchTexture },
-	// 	// textureArray : { type: }   
-	// };
+	var customUniforms = 
+	{
+		uTextureArray : { type: "tv", value: [ discTexture, hatchTexture ] }
+		// texture1 : { type: "t", value: discTexture },
+		// texture2 : { type: "t", value: hatchTexture },
+		// textureArray : { type: }   
+	};
 
 	var customAttributes = {
         
-        aTextureArray : { type: "tv", value: [ discTexture, hatchTexture ] }
-        // aTextureIndex : { type: "iv1", value: [] }
+        // aTextureArray : { type: "tv", value: [ discTexture, hatchTexture ] }
+        aTextureIndex : { type: "fv1", value: [] } // even though these are indexes (and therefore ints), this must be a float array - unclear why, but it's a type constraint in the shader
 
 	};
 
 	var numTextures = customUniforms.uTextureArray.value.length;
     for ( var i = 0; i < geometry.vertices.length; i++ ) {
     	var textureIndex = Math.floor( Math.random() * numTextures );
-    	// console.log( "Random index is " + textureIndex );
+    	console.log( "Random index is " + textureIndex );
     	// customAttributes.aTextureIndex.value.push( textures[ textureIndex ] );
-    	customAttributes.aTextureArray.value.push( textures[ textureIndex ] );
+    	customAttributes.aTextureIndex.value.push( textureIndex );
+
     }
 
 	var shaderMaterial = new THREE.ShaderMaterial( 
 	{
-		// uniforms: 		customUniforms,
+		uniforms: 		customUniforms,
 		attributes:     customAttributes,
 		vertexShader:   document.getElementById( 'vertexshader' ).textContent,
 		fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
